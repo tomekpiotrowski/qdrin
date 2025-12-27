@@ -56,6 +56,32 @@ jobs:
     runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v3
+      - name: Validate version match
+        shell: bash
+        run: |
+          # Extract version from git tag (remove 'v' prefix)
+          TAG_VERSION="${GITHUB_REF#refs/tags/v}"
+
+          # Extract version from package.json
+          PACKAGE_VERSION=$(grep -oP '"version":\s*"\K[^"]+' app/package.json)
+
+          # Extract version from tauri.conf.json
+          TAURI_VERSION=$(grep -oP '"version":\s*"\K[^"]+' app/src-tauri/tauri.conf.json)
+
+          echo "Tag version: $TAG_VERSION"
+          echo "Package.json version: $PACKAGE_VERSION"
+          echo "Tauri.conf.json version: $TAURI_VERSION"
+
+          # Check if all versions match
+          if [ "$TAG_VERSION" != "$PACKAGE_VERSION" ] || [ "$TAG_VERSION" != "$TAURI_VERSION" ]; then
+            echo "❌ Version mismatch detected!"
+            echo "Tag: v$TAG_VERSION"
+            echo "package.json: $PACKAGE_VERSION"
+            echo "tauri.conf.json: $TAURI_VERSION"
+            exit 1
+          fi
+
+          echo "✅ All versions match: $TAG_VERSION"
       - name: setup node
         uses: actions/setup-node@v3
         with:
