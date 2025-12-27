@@ -4,9 +4,9 @@
   "version": "0.2.0",
   "identifier": "com.atteo.qdrin",
   "build": {
-    "beforeDevCommand": "bun run start",
+    "beforeDevCommand": "yarn run start",
     "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "bun run build",
+    "beforeBuildCommand": "yarn run build",
     "frontendDist": "../dist/qdrin/browser"
   },
   "app": {
@@ -28,7 +28,10 @@
       "capabilities": [
         {
           "identifier": "main-capability",
-          "windows": ["main", "options"],
+          "windows": [
+            "main",
+            "options"
+          ],
           "permissions": [
             "core:window:allow-set-focus",
             "core:window:allow-set-always-on-top",
@@ -69,6 +72,15 @@
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "createUpdaterArtifacts": true
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEQ0MzhFRkI5QkE1MkI3QTcKUldTbnQxSzZ1ZTg0MUpJYWJNRUpBdzYxeStzcWREc3NjZEpicTRwN21QZjZwZGdTQmN0ajEvRTEK",
+      "endpoints": [
+        "https://gist.githubusercontent.com/tomekpiotrowski/ec098f2ce19021ef4ec860a549182284/raw/31b60c185d9c438512e1a502710f382a76819751/qdrin-updater.json"
+      ]
+    }
   }
 }
