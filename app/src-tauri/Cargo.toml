@@ -1,6 +1,6 @@
 [package]
 name = "qdrin"
-version = "0.2.0"
+version = "0.2.1"
 description = "A focus timer"
 authors = ["atteo@tteo.com"]
 edition = "2021"
