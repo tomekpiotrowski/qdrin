@@ -27,7 +27,7 @@ enum State {
 export class TimerComponent implements OnInit, OnDestroy {
   // Timer state
   timeRemaining = 5; // 5 seconds for testing
-  completedPomodoros = 0;
+  completedSessions = 0;
   state: State = State.Stopped;
   fullscreen = false;
 
@@ -261,15 +261,15 @@ export class TimerComponent implements OnInit, OnDestroy {
       this.startTimer();
     } else if (stateBeforePause === State.Focus) {
       // Focus session completed, start break
-      this.completedPomodoros++;
+      this.completedSessions++;
       this.updateFocusState(State.Break);
       if (this.settings.soundEnabled) {
         this.playBreakSound();
       }
       await this.enterBreakMode();
 
-      // Use long break every 4 pomodoros
-      this.timeRemaining = this.completedPomodoros % 4 === 0
+      // Use long break every 4 sessions
+      this.timeRemaining = this.completedSessions % 4 === 0
         ? this.LONG_BREAK_TIME
         : this.BREAK_TIME;
 

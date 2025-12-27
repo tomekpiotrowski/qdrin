@@ -7,7 +7,7 @@ import math
 import os
 
 def create_icon(size):
-    """Create a pomodoro timer icon at the specified size"""
+    """Create a focus timer icon at the specified size"""
     img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
 

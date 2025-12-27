@@ -69,7 +69,7 @@ pub fn run() {
 
             let tray = app.tray_by_id("main").unwrap();
             tray.set_menu(Some(menu))?;
-            tray.set_tooltip(Some("Qdrin - Pomodoro Timer"))?;
+            tray.set_tooltip(Some("Qdrin - Focus Timer"))?;
 
             // Handle tray menu events
             tray.on_menu_event(move |app, event| match event.id().as_ref() {
