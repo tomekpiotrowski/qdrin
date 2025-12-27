@@ -99,9 +99,9 @@
   </div>
 
   <div class="section">
-    <label>Add website to block (domain only):</label>
+    <label>Add website to block (domain, URL, or path fragment):</label>
     <div style="display: flex; gap: 8px;">
-      <input type="text" id="website-input" placeholder="e.g., reddit.com">
+      <input type="text" id="website-input" placeholder="e.g., reddit.com or reddit.com/r/funny">
       <button id="add-btn">Add</button>
     </div>
   </div>
@@ -110,6 +110,21 @@
     <label>Blocked websites:</label>
     <ul class="website-list" id="website-list">
       <li class="empty-state">No websites blocked</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <label>Allowlist (domain, URL, or path fragment; takes precedence):</label>
+    <div style="display: flex; gap: 8px;">
+      <input type="text" id="allow-input" placeholder="e.g., music.youtube.com or youtube.com/i/grok">
+      <button id="allow-add-btn">Allow</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <label>Allowed websites:</label>
+    <ul class="website-list" id="allow-list">
+      <li class="empty-state">No websites allowed</li>
     </ul>
   </div>
 
