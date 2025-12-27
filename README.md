@@ -9,6 +9,9 @@ Qdrin consists of two components:
 - **Desktop App** - A Tauri-based desktop application with Angular frontend featuring a customizable focus/break timer
 - **Browser Extension** - Chrome extension that blocks distracting websites during focus sessions
 
+![Qdrin Screenshot 1](assets/qdrin1.png)
+![Qdrin Screenshot 2](assets/qdrin2.png)
+
 ## Usage
 
 1. **Start the Desktop App** - Launch Qdrin and configure your focus/break durations
