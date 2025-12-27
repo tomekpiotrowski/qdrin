@@ -212,11 +212,13 @@ export class TimerComponent implements OnInit, OnDestroy {
     }
   }
 
-  resetTimer(): void {
+  async resetTimer(): Promise<void> {
     this.pauseTimer();
-    const isFocusState = this.state === State.Focus || this.state === State.FocusPaused ||
-      this.state === State.FocusExtra || this.state === State.FocusExtraPaused;
-    this.timeRemaining = isFocusState ? this.WORK_TIME : this.BREAK_TIME;
+    this.timeRemaining = this.WORK_TIME;
+    this.updateFocusState(State.Stopped);
+
+    // Drop break UI affordances (e.g., always-on-top) when returning to stopped
+    await this.exitBreakMode();
   }
 
   private async completeSession(): Promise<void> {

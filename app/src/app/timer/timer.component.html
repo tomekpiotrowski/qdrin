@@ -42,6 +42,9 @@
           <button class="btn-primary" (click)="startTimer()">
             <span class="btn-icon">▶</span> Resume
           </button>
+          <button class="btn-primary" (click)="resetTimer()">
+            <span class="btn-icon">↺</span> Reset
+          </button>
         </ng-container>
 
         <!-- FocusExtra state: only Pause button -->
@@ -56,12 +59,18 @@
           <button class="btn-primary" (click)="startTimer()">
             <span class="btn-icon">▶</span> Resume
           </button>
+          <button class="btn-primary" (click)="resetTimer()">
+            <span class="btn-icon">↺</span> Reset
+          </button>
         </ng-container>
 
         <!-- Break state: only Snooze button -->
         <ng-container *ngIf="state === State.Break">
           <button class="btn-primary" (click)="snoozeBreak()">
             <span class="btn-icon">⏰</span> Snooze
+          </button>
+          <button class="btn-primary" (click)="resetTimer()">
+            <span class="btn-icon">↺</span> Reset
           </button>
         </ng-container>
 
