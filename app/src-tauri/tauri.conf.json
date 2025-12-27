@@ -15,7 +15,12 @@
         "title": "Qdrin",
         "width": 400,
         "height": 200,
-        "resizable": false
+        "resizable": false,
+        "decorations": true,
+        "titleBarStyle": "Visible",
+        "minimizable": true,
+        "maximizable": false,
+        "closable": true
       }
     ],
     "trayIcon": {
