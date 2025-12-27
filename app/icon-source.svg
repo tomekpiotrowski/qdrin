@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle - split blue/red -->
+  <defs>
+    <linearGradient id="splitGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="50%" style="stop-color:#4a7ba9;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#c74440;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Main circle with split color -->
+  <circle cx="256" cy="256" r="240" fill="url(#splitGradient)"/>
+
+  <!-- Inner circle (white face) -->
+  <circle cx="256" cy="256" r="200" fill="#f5ebeb"/>
+
+  <!-- Clock markers -->
+  <rect x="251" y="76" width="10" height="30" fill="#2a4a6a" rx="5"/>
+  <rect x="251" y="406" width="10" height="30" fill="#b63f3b" rx="5"/>
+  <rect x="76" y="251" width="30" height="10" fill="#4a7ba9" rx="5"/>
+  <rect x="406" y="251" width="30" height="10" fill="#c74440" rx="5"/>
+
+  <!-- Hour hand pointing to 3 o'clock (work side) -->
+  <rect x="256" y="251" width="80" height="12" fill="#4a7ba9" rx="6"/>
+
+  <!-- Minute hand pointing to 12 o'clock -->
+  <rect x="251" y="96" width="10" height="160" fill="#2a4a6a" rx="5"/>
+
+  <!-- Center dot -->
+  <circle cx="256" cy="256" r="16" fill="#2a4a6a"/>
+</svg>

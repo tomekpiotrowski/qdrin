@@ -1,0 +1,65 @@
+<div class="theme-blue">
+  <div class="options-container">
+    <div class="option-item">
+      <label class="option-label">
+        <input type="checkbox" [(ngModel)]="settings.hideWindowOnStart" (ngModelChange)="saveSettings()">
+        <span>Hide window when timer starts</span>
+      </label>
+    </div>
+
+    <div class="option-item">
+      <label class="option-label">
+        <input type="checkbox" [(ngModel)]="settings.autostart" (ngModelChange)="toggleAutostart($event)">
+        <span>Autostart on system boot</span>
+      </label>
+    </div>
+
+    <div class="option-item">
+      <label class="option-label">
+        <input type="checkbox" [(ngModel)]="settings.soundEnabled" (ngModelChange)="saveSettings()">
+        <span>Enable sound notifications</span>
+      </label>
+    </div>
+
+    <div class="option-item">
+      <label class="option-label">
+        <div class="number-input-wrapper">
+          <input type="number" [(ngModel)]="settings.focusDuration" min="1" max="120" step="1" (keydown)="onKeyDown($event)" (blur)="validateInput($event, 'focusDuration', 25)">
+          <div class="spinner-buttons">
+            <button type="button" class="spinner-btn spinner-up" (click)="increment('focusDuration', 120)">▲</button>
+            <button type="button" class="spinner-btn spinner-down" (click)="decrement('focusDuration', 1)">▼</button>
+          </div>
+        </div>
+        <span>Focus duration (minutes)</span>
+      </label>
+    </div>
+
+    <div class="option-item">
+      <label class="option-label">
+        <div class="number-input-wrapper">
+          <input type="number" [(ngModel)]="settings.shortBreakDuration" min="1" max="60" step="1" (keydown)="onKeyDown($event)" (blur)="validateInput($event, 'shortBreakDuration', 5)">
+          <div class="spinner-buttons">
+            <button type="button" class="spinner-btn spinner-up" (click)="increment('shortBreakDuration', 60)">▲</button>
+            <button type="button" class="spinner-btn spinner-down" (click)="decrement('shortBreakDuration', 1)">▼</button>
+          </div>
+        </div>
+        <span>Short break duration (minutes)</span>
+      </label>
+    </div>
+
+    <div class="option-item">
+      <label class="option-label">
+        <div class="number-input-wrapper">
+          <input type="number" [(ngModel)]="settings.longBreakDuration" min="1" max="60" step="1" (keydown)="onKeyDown($event)" (blur)="validateInput($event, 'longBreakDuration', 15)">
+          <div class="spinner-buttons">
+            <button type="button" class="spinner-btn spinner-up" (click)="increment('longBreakDuration', 60)">▲</button>
+            <button type="button" class="spinner-btn spinner-down" (click)="decrement('longBreakDuration', 1)">▼</button>
+          </div>
+        </div>
+        <span>Long break duration (minutes)</span>
+      </label>
+    </div>
+
+    <div class="version" *ngIf="version">v{{ version }}</div>
+  </div>
+</div>

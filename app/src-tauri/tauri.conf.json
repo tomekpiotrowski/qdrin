@@ -1,0 +1,74 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "qdrin",
+  "version": "0.2.0",
+  "identifier": "com.atteo.qdrin",
+  "build": {
+    "beforeDevCommand": "bun run start",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "bun run build",
+    "frontendDist": "../dist/qdrin/browser"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Qdrin",
+        "width": 400,
+        "height": 200,
+        "resizable": false
+      }
+    ],
+    "trayIcon": {
+      "iconPath": "icons/32x32.png",
+      "iconAsTemplate": true,
+      "menuOnLeftClick": false
+    },
+    "security": {
+      "csp": null,
+      "capabilities": [
+        {
+          "identifier": "main-capability",
+          "windows": ["main", "options"],
+          "permissions": [
+            "core:window:allow-set-focus",
+            "core:window:allow-set-always-on-top",
+            "core:window:allow-unminimize",
+            "core:window:allow-set-fullscreen",
+            "core:window:allow-set-resizable",
+            "core:window:allow-set-size",
+            "core:window:allow-minimize",
+            "core:window:allow-show",
+            "core:window:allow-hide",
+            "core:window:allow-close",
+            "core:webview:allow-create-webview-window",
+            "core:tray:allow-new",
+            "core:tray:allow-set-icon",
+            "core:tray:allow-set-menu",
+            "core:tray:allow-set-tooltip",
+            "core:menu:allow-new",
+            "core:menu:allow-append",
+            "core:menu:allow-prepend",
+            "core:menu:allow-insert",
+            "core:menu:allow-remove",
+            "core:menu:allow-remove-at",
+            "core:menu:default",
+            "autostart:allow-enable",
+            "autostart:allow-disable",
+            "autostart:allow-is-enabled"
+          ]
+        }
+      ]
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ]
+  }
+}

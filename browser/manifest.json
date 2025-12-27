@@ -1,0 +1,47 @@
+{
+  "manifest_version": 3,
+  "name": "Qdrin Focus Blocker",
+  "version": "0.2.0",
+  "description": "Blocks distracting websites during Qdrin focus sessions",
+  "permissions": [
+    "declarativeNetRequest",
+    "storage",
+    "tabs",
+    "scripting",
+    "webNavigation"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "declarative_net_request": {
+    "rule_resources": [
+      {
+        "id": "block_rules",
+        "enabled": true,
+        "path": "rules.json"
+      }
+    ]
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["blocked.html", "blocked.js"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

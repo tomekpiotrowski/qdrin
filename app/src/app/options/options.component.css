@@ -1,0 +1,153 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.theme-blue {
+    height: 100%;
+}
+
+.options-container {
+  background: var(--color-medium);
+  padding: 32px;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.options-title {
+  color: var(--gray-light);
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0 0 24px 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.option-item {
+  margin-bottom: 16px;
+}
+
+.option-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  color: var(--gray-light);
+  font-size: 0.95rem;
+}
+
+.number-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+}
+
+.option-label input[type="number"] {
+  width: 50px;
+  padding: 6px 10px;
+  padding-right: 4px;
+  font-size: 0.95rem;
+  background: var(--color-dark);
+  color: var(--gray-light);
+  border: 2px solid var(--color-primary);
+  border-radius: 4px 0 0 4px;
+  border-right: none;
+  outline: none;
+  font-family: inherit;
+  text-align: center;
+}
+
+/* Hide native spinners */
+.option-label input[type="number"]::-webkit-inner-spin-button,
+.option-label input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.option-label input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.spinner-buttons {
+  display: flex;
+  flex-direction: column;
+  border: 2px solid var(--color-primary);
+  border-left: none;
+  border-radius: 0 4px 4px 0;
+  overflow: hidden;
+}
+
+.spinner-btn {
+  width: 18px;
+  height: 50%;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: var(--color-dark);
+  color: var(--gray-light);
+  cursor: pointer;
+  font-size: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  outline: none;
+}
+
+.spinner-btn:hover {
+  background: var(--color-primary);
+}
+
+.spinner-up {
+  border-bottom: 1px solid var(--color-primary);
+}
+
+.version {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.5);
+  user-select: none;
+}
+
+.option-label input[type="number"]:hover,
+.number-input-wrapper:hover input[type="number"] {
+  border-color: var(--color-light);
+  background: var(--color-medium);
+}
+
+.option-label input[type="number"]:focus {
+  border-color: var(--color-light);
+  background: var(--color-medium);
+}
+
+/* Style number input spinner arrows */
+.option-label input[type="number"]::-webkit-inner-spin-button,
+.option-label input[type="number"]::-webkit-outer-spin-button {
+  opacity: 1;
+  cursor: pointer;
+  background: var(--color-dark);
+}
+
+.option-label input[type="number"]::-webkit-inner-spin-button:hover,
+.option-label input[type="number"]::-webkit-outer-spin-button:hover {
+  background: var(--color-primary);
+}
+
+.number-input-wrapper:hover .spinner-buttons {
+  border-color: var(--color-light);
+}
+
+.number-input-wrapper:hover input[type="number"] {
+  border-color: var(--color-light);
+}
+
+.option-label input[type="number"]:focus + .spinner-buttons {
+  border-color: var(--color-light);
+}
+
+
+.controls {
+  margin-top: 24px;
+  justify-content: flex-end;
+}

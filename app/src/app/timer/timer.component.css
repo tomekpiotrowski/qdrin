@@ -1,0 +1,158 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.theme-wrapper {
+  height: 100%;
+  width: 100%;
+}
+
+.container {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: var(--color-medium);
+  position: relative;
+}
+
+.container.fullscreen-mode {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: var(--color-darkest);
+  z-index: 9999;
+}
+
+.fullscreen-mode .timer-card {
+  background: transparent;
+  padding: 48px;
+  max-width: none;
+}
+
+.fullscreen-mode .time {
+  font-size: 8rem;
+  margin-bottom: 32px;
+}
+
+.fullscreen-mode .session-label {
+  font-size: 4rem;
+  margin-bottom: 48px;
+  letter-spacing: 8px;
+}
+
+.fullscreen-mode .break-message {
+  font-size: 1.5rem;
+  color: var(--gray-medium);
+  letter-spacing: 2px;
+  margin: 48px 0;
+  text-align: center;
+}
+
+.pomodoro-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: var(--color-dark);
+  color: var(--gray-light);
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  opacity: 0.9;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.badge-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.icon-buttons {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  gap: 4px;
+}
+
+.icon-btn {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  background: var(--color-dark);
+  color: var(--gray-light);
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  opacity: 0.8;
+}
+
+.icon-btn:hover {
+  background: var(--color-primary);
+  opacity: 1;
+  transform: scale(1.1);}
+
+.icon-btn.active {
+  background: var(--color-primary);
+  opacity: 1;
+}
+
+.timer-card {
+  padding: 20px;
+  max-width: 500px;
+  width: 90%;
+}
+
+.timer-display {
+  margin: 16px 0;
+  text-align: center;
+}
+
+.time {
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--gray-light);
+  font-variant-numeric: tabular-nums;
+  margin-bottom: 4px;
+}
+
+.session-label {
+  font-size: 0.9rem;
+  color: var(--gray-medium);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
+}
+
+.controls {
+  gap: 8px;
+  margin: 16px 0;
+}
+
+.btn-icon {
+  font-size: 1rem;
+}
+
+.break-message {
+  font-size: 1rem;
+  color: var(--gray-medium);
+  text-align: center;
+  margin: 16px 0;
+}
+
+.hidden {
+  display: none;
+}

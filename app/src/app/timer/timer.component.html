@@ -1,0 +1,78 @@
+<div class="theme-wrapper" [class.theme-blue]="isWorkSession" [class.theme-red]="!isWorkSession">
+  <main class="container" [class.fullscreen-mode]="fullscreen">
+    <div class="pomodoro-badge">
+      <img src="assets/icon.png" alt="Pomodoro" class="badge-icon"> {{ completedPomodoros }}
+    </div>
+
+    <div class="icon-buttons">
+      <button class="icon-btn" (click)="hideWindow()" title="Hide window" *ngIf="fullscreen">
+        ⬇️
+      </button>
+      <button class="icon-btn" [class.active]="fullscreen" (click)="toggleFullscreen()" title="Toggle Fullscreen">
+        ⛶
+      </button>
+      <button class="icon-btn" (click)="openOptions()" title="Options">
+        ⚙
+      </button>
+    </div>
+
+    <div class="timer-card">
+      <div class="timer-display">
+        <div class="time">{{ formattedTime }}</div>
+        <div class="session-label">{{ sessionLabel }}</div>
+      </div>
+
+      <div class="controls">
+        <!-- Stopped state: only Start button -->
+        <ng-container *ngIf="state === State.Stopped">
+          <button class="btn-primary" (click)="startTimer()">
+            <span class="btn-icon">▶</span> Start
+          </button>
+        </ng-container>
+
+        <!-- Focus state: only Pause button -->
+        <ng-container *ngIf="state === State.Focus">
+          <button class="btn-primary" (click)="pauseTimer()">
+            <span class="btn-icon">⏸</span> Pause
+          </button>
+        </ng-container>
+
+        <!-- FocusPaused state: only Start button -->
+        <ng-container *ngIf="state === State.FocusPaused">
+          <button class="btn-primary" (click)="startTimer()">
+            <span class="btn-icon">▶</span> Resume
+          </button>
+        </ng-container>
+
+        <!-- FocusExtra state: only Pause button -->
+        <ng-container *ngIf="state === State.FocusExtra">
+          <button class="btn-primary" (click)="pauseTimer()">
+            <span class="btn-icon">⏸</span> Pause
+          </button>
+        </ng-container>
+
+        <!-- FocusExtraPaused state: only Start button -->
+        <ng-container *ngIf="state === State.FocusExtraPaused">
+          <button class="btn-primary" (click)="startTimer()">
+            <span class="btn-icon">▶</span> Resume
+          </button>
+        </ng-container>
+
+        <!-- Break state: only Snooze button -->
+        <ng-container *ngIf="state === State.Break">
+          <button class="btn-primary" (click)="snoozeBreak()">
+            <span class="btn-icon">⏰</span> Snooze
+          </button>
+        </ng-container>
+
+        <!-- WaitingForFocus state: only Start button -->
+        <ng-container *ngIf="state === State.WaitingForFocus">
+          <button class="btn-primary" (click)="startTimer()">
+            <span class="btn-icon">▶</span> Start
+          </button>
+        </ng-container>
+      </div>
+
+    </div>
+  </main>
+</div>
