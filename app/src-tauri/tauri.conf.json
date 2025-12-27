@@ -33,6 +33,8 @@
             "options"
           ],
           "permissions": [
+            "core:app:allow-version",
+            "core:app:default",
             "core:window:allow-set-focus",
             "core:window:allow-set-always-on-top",
             "core:window:allow-unminimize",

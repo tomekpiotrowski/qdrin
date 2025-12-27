@@ -19,8 +19,13 @@ export class OptionsComponent implements OnInit {
     this.settings = Options.load();
     this.syncAutostart();
 
-    // Load version from Tauri
-    getVersion().then(v => this.version = v).catch(() => this.version = '0.0.0');
+    // Load version from Tauri; leave blank on failure
+    getVersion()
+      .then(v => this.version = v)
+      .catch((err) => {
+        console.warn('Unable to read app version from Tauri', err);
+        this.version = '';
+      });
   }
 
   private async syncAutostart(): Promise<void> {
