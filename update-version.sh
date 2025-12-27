@@ -33,10 +33,17 @@ echo "✓ Updated app/src-tauri/tauri.conf.json"
 sed -i "s/\"version\": \"[^\"]*\"/\"version\": \"$VERSION\"/" browser/manifest.json
 echo "✓ Updated browser/manifest.json"
 
+# Run cargo check to update Cargo.lock
+echo ""
+echo "Running cargo check to update Cargo.lock..."
+cd app/src-tauri
+if cargo check; then
+  echo "✓ Cargo.lock updated"
+else
+  echo "❌ cargo check failed"
+  exit 1
+fi
+cd ../..
+
 echo ""
 echo "✅ Version updated to $VERSION in all files"
-echo ""
-echo "Next steps:"
-echo "1. Review the changes with: git diff"
-echo "2. Run 'cd app/src-tauri && cargo check' to update Cargo.lock"
-echo "3. Commit the changes"
