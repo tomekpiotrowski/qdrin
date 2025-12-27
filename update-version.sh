@@ -1,0 +1,42 @@
+#!/bin/bash
+# Update version across all project files
+
+VERSION=$1
+
+if [ -z "$VERSION" ]; then
+  echo "Usage: ./update-version.sh <version>"
+  echo "Example: ./update-version.sh 0.3.0"
+  exit 1
+fi
+
+# Validate version format (basic semver check)
+if ! [[ $VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+  echo "Error: Version must be in semver format (e.g., 0.3.0)"
+  exit 1
+fi
+
+echo "Updating version to $VERSION..."
+
+# Update app/package.json
+sed -i "s/\"version\": \"[^\"]*\"/\"version\": \"$VERSION\"/" app/package.json
+echo "✓ Updated app/package.json"
+
+# Update app/src-tauri/Cargo.toml
+sed -i "s/^version = \"[^\"]*\"/version = \"$VERSION\"/" app/src-tauri/Cargo.toml
+echo "✓ Updated app/src-tauri/Cargo.toml"
+
+# Update app/src-tauri/tauri.conf.json
+sed -i "s/\"version\": \"[^\"]*\"/\"version\": \"$VERSION\"/g" app/src-tauri/tauri.conf.json
+echo "✓ Updated app/src-tauri/tauri.conf.json"
+
+# Update browser/manifest.json
+sed -i "s/\"version\": \"[^\"]*\"/\"version\": \"$VERSION\"/" browser/manifest.json
+echo "✓ Updated browser/manifest.json"
+
+echo ""
+echo "✅ Version updated to $VERSION in all files"
+echo ""
+echo "Next steps:"
+echo "1. Review the changes with: git diff"
+echo "2. Run 'cd app/src-tauri && cargo check' to update Cargo.lock"
+echo "3. Commit the changes"
