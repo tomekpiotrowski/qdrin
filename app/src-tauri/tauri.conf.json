@@ -75,7 +75,11 @@
   },
   "bundle": {
     "active": true,
-    "targets": "all",
+    "targets": [
+      "appimage",
+      "dmg",
+      "msi"
+    ],
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
@@ -89,7 +93,7 @@
     "updater": {
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEQ0MzhFRkI5QkE1MkI3QTcKUldTbnQxSzZ1ZTg0MUpJYWJNRUpBdzYxeStzcWREc3NjZEpicTRwN21QZjZwZGdTQmN0ajEvRTEK",
       "endpoints": [
-        "https://gist.githubusercontent.com/tomekpiotrowski/ec098f2ce19021ef4ec860a549182284/raw/qdrin-updater.json"
+        "https://github.com/tomekpiotrowski/qdrin/releases/latest/download/latest.json"
       ]
     }
   }
