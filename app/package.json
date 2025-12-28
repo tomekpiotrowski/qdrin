@@ -1,6 +1,6 @@
 {
-  "name": "qdrin",
   "version": "0.3.0",
+  "name": "qdrin",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",

@@ -63,22 +63,31 @@ jobs:
           # Extract version from git tag (remove 'v' prefix)
           TAG_VERSION="${GITHUB_REF#refs/tags/v}"
 
-          # Extract version from package.json
-          PACKAGE_VERSION=$(grep -oP '"version":\s*"\K[^"]+' app/package.json)
+          # Files have version on line 2; use portable awk to extract digits/dots
+          extract_line2_version() {
+            awk 'NR==2{ if (match($0, /[0-9]+(\.[0-9]+)*/)) { print substr($0, RSTART, RLENGTH) } }' "$1"
+          }
 
-          # Extract version from tauri.conf.json
-          TAURI_VERSION=$(grep -oP '"version":\s*"\K[^"]+' app/src-tauri/tauri.conf.json)
+          PACKAGE_VERSION=$(extract_line2_version app/package.json)
+          TAURI_VERSION=$(extract_line2_version app/src-tauri/tauri.conf.json)
+          CARGO_VERSION=$(extract_line2_version app/src-tauri/Cargo.toml)
 
           echo "Tag version: $TAG_VERSION"
           echo "Package.json version: $PACKAGE_VERSION"
           echo "Tauri.conf.json version: $TAURI_VERSION"
+          echo "Cargo.toml version: $CARGO_VERSION"
 
-          # Check if all versions match
-          if [ "$TAG_VERSION" != "$PACKAGE_VERSION" ] || [ "$TAG_VERSION" != "$TAURI_VERSION" ]; then
+          if [ -z "$TAG_VERSION" ] || [ -z "$PACKAGE_VERSION" ] || [ -z "$TAURI_VERSION" ] || [ -z "$CARGO_VERSION" ]; then
+            echo "❌ Failed to extract one or more versions"
+            exit 1
+          fi
+
+          if [ "$TAG_VERSION" != "$PACKAGE_VERSION" ] || [ "$TAG_VERSION" != "$TAURI_VERSION" ] || [ "$TAG_VERSION" != "$CARGO_VERSION" ]; then
             echo "❌ Version mismatch detected!"
             echo "Tag: v$TAG_VERSION"
             echo "package.json: $PACKAGE_VERSION"
             echo "tauri.conf.json: $TAURI_VERSION"
+            echo "Cargo.toml: $CARGO_VERSION"
             exit 1
           fi
 
