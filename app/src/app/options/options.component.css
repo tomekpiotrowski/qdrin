@@ -101,13 +101,25 @@
   border-bottom: 1px solid var(--color-primary);
 }
 
-.version {
+.app-status {
   position: absolute;
   bottom: 12px;
   right: 12px;
-  font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--color-lighter);
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  opacity: 0.85;
+  max-width: 280px;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   user-select: none;
+}
+
+.app-status .status-text {
+  display: block;
 }
 
 .option-label input[type="number"]:hover,

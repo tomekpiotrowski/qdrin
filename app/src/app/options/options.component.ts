@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { enable, disable, isEnabled } from '@tauri-apps/plugin-autostart';
-import { getVersion } from '@tauri-apps/api/app';
 import { Options } from '../models/options';
+import { StatusService } from '../status.service';
 @Component({
   selector: 'app-options',
   standalone: true,
@@ -13,19 +13,11 @@ import { Options } from '../models/options';
 })
 export class OptionsComponent implements OnInit {
   settings = new Options();
-  version = '';
+  constructor(public statusService: StatusService) {}
 
   ngOnInit(): void {
     this.settings = Options.load();
     this.syncAutostart();
-
-    // Load version from Tauri; leave blank on failure
-    getVersion()
-      .then(v => this.version = v)
-      .catch((err) => {
-        console.warn('Unable to read app version from Tauri', err);
-        this.version = '';
-      });
   }
 
   private async syncAutostart(): Promise<void> {

@@ -59,7 +59,6 @@
   position: absolute;
   top: 8px;
   left: 8px;
-  background: var(--color-dark);
   color: var(--gray-light);
   padding: 4px 10px;
   border-radius: 12px;
@@ -80,8 +79,7 @@
   position: absolute;
   bottom: 8px;
   left: 8px;
-  background: var(--color-dark);
-  color: var(--gray-light);
+  color: var(--color-lighter);
   padding: 6px 12px;
   border-radius: 12px;
   font-size: 0.8rem;

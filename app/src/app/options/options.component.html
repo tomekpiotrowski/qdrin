@@ -60,6 +60,8 @@
       </label>
     </div>
 
-    <div class="version" *ngIf="version">v{{ version }}</div>
+    <div class="app-status">
+      <span class="status-text">{{ statusService.getStatusText() }}</span>
+    </div>
   </div>
 </div>

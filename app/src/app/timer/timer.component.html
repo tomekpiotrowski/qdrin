@@ -4,11 +4,6 @@
       <img src="assets/icon.png" alt="Sessions" class="badge-icon"> {{ completedSessions }}
     </div>
 
-    <!-- App Status Display -->
-    <div class="app-status">
-      <span class="status-text">{{ statusService.getStatusText() }}</span>
-    </div>
-
     <div class="icon-buttons">
       <button class="icon-btn" (click)="hideWindow()" title="Hide window" *ngIf="fullscreen">
         ⬇️
