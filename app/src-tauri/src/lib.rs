@@ -11,17 +11,19 @@ struct FocusState {
     is_focusing: Arc<Mutex<bool>>,
 }
 
-// Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-#[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
-}
-
 #[tauri::command]
 fn set_focus_state(state: State<'_, FocusState>, is_focusing: bool) {
     if let Ok(mut focus) = state.is_focusing.lock() {
         *focus = is_focusing;
     }
+}
+
+#[tauri::command]
+fn update_tray_title(app: tauri::AppHandle, title: String) -> Result<(), String> {
+    if let Some(tray) = app.tray_by_id("main") {
+        tray.set_title(Some(&title)).map_err(|e| e.to_string())?;
+    }
+    Ok(())
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -58,7 +60,7 @@ pub fn run() {
             Some(vec![]),
         ))
         .manage(focus_state)
-        .invoke_handler(tauri::generate_handler![greet, set_focus_state])
+        .invoke_handler(tauri::generate_handler![set_focus_state, update_tray_title])
         .setup(|app| {
             // Create tray menu
             let show_item = MenuItem::with_id(app, "show", "Show", true, None::<&str>)?;

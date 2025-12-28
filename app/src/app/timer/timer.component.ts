@@ -79,11 +79,11 @@ export class TimerComponent implements OnInit, OnDestroy {
       case State.Focus:
         return 'Focus';
       case State.FocusPaused:
-        return 'Focus (Paused)';
+        return 'Paused';
       case State.FocusExtra:
         return 'Focus';
       case State.FocusExtraPaused:
-        return 'Focus (Paused)';
+        return 'Paused';
       case State.Break:
         return 'Break Time';
       case State.WaitingForFocus:
@@ -118,6 +118,8 @@ export class TimerComponent implements OnInit, OnDestroy {
     if (this.settings.fullscreen) {
       this.applyFullscreenOnStartup();
     }
+    // Initialize tray title
+    this.updateTrayTitle();
   }
 
   private loadSettings(): void {
@@ -131,6 +133,7 @@ export class TimerComponent implements OnInit, OnDestroy {
     // Update current time if in stopped state
     if (this.state === State.Stopped) {
       this.timeRemaining = this.WORK_TIME;
+      this.updateTrayTitle();
     }
   }
 
@@ -162,6 +165,9 @@ export class TimerComponent implements OnInit, OnDestroy {
       this.updateFocusState(State.FocusExtra);
     }
 
+    // Update tray title immediately when starting
+    this.updateTrayTitle();
+
     // Only hide window during focus sessions
     if (this.state === State.Focus || this.state === State.FocusExtra) {
       if (this.settings.soundEnabled) {
@@ -183,6 +189,7 @@ export class TimerComponent implements OnInit, OnDestroy {
 
       if (remaining !== this.timeRemaining) {
         this.timeRemaining = remaining;
+        this.updateTrayTitle();
       }
 
       if (this.timeRemaining <= 0) {
@@ -210,6 +217,8 @@ export class TimerComponent implements OnInit, OnDestroy {
     } else if (this.state === State.FocusExtra) {
       this.updateFocusState(State.FocusExtraPaused);
     }
+    
+    this.updateTrayTitle();
   }
 
   async resetTimer(): Promise<void> {
@@ -219,6 +228,8 @@ export class TimerComponent implements OnInit, OnDestroy {
 
     // Drop break UI affordances (e.g., always-on-top) when returning to stopped
     await this.exitBreakMode();
+    
+    this.updateTrayTitle();
   }
 
   private async completeSession(): Promise<void> {
@@ -451,6 +462,13 @@ export class TimerComponent implements OnInit, OnDestroy {
     } catch (error) {
       console.error('Failed to hide window:', error);
     }
+  }
+
+  private updateTrayTitle(): void {
+    const title = this.formattedTime;
+    invoke('update_tray_title', { title }).catch(err => {
+      console.error('Failed to update tray title:', err);
+    });
   }
 
   ngOnDestroy(): void {
