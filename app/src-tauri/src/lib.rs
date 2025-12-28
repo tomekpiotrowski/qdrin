@@ -1,9 +1,14 @@
+use log::{error, info};
+use std::sync::{Arc, Mutex};
 use tauri::{
     menu::{Menu, MenuItem},
-    Manager, State,
+    AppHandle, Emitter, Manager, State, Wry,
 };
-use std::sync::{Arc, Mutex};
+use tauri_plugin_updater::UpdaterExt;
 use warp::Filter;
+
+mod app_status;
+use app_status::{AppStatus, Status};
 
 // Shared state for focus mode
 #[derive(Default, Clone)]
@@ -26,27 +31,34 @@ fn update_tray_title(app: tauri::AppHandle, title: String) -> Result<(), String>
     Ok(())
 }
 
+#[tauri::command]
+async fn app_status(state: State<'_, AppStatus>) -> Result<Status, String> {
+    Ok(state.get().await)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    // Initialize logger
+    env_logger::Builder::from_default_env()
+        .format_timestamp_millis()
+        .init();
+
     let focus_state = FocusState::default();
+    let app_status_state = AppStatus::new();
     let focus_state_for_server = focus_state.clone();
 
     // Spawn HTTP server for browser extension communication
     tauri::async_runtime::spawn(async move {
         let state = focus_state_for_server;
 
-        let status = warp::path("status")
-            .and(warp::get())
-            .map(move || {
-                let is_focusing = state.is_focusing.lock().unwrap_or_else(|e| e.into_inner());
-                warp::reply::json(&serde_json::json!({
-                    "is_focusing": *is_focusing
-                }))
-            });
+        let status = warp::path("status").and(warp::get()).map(move || {
+            let is_focusing = state.is_focusing.lock().unwrap_or_else(|e| e.into_inner());
+            warp::reply::json(&serde_json::json!({
+                "is_focusing": *is_focusing
+            }))
+        });
 
-        let cors = warp::cors()
-            .allow_any_origin()
-            .allow_methods(vec!["GET"]);
+        let cors = warp::cors().allow_any_origin().allow_methods(vec!["GET"]);
 
         warp::serve(status.with(cors))
             .run(([127, 0, 0, 1], 42069))
@@ -59,8 +71,14 @@ pub fn run() {
             tauri_plugin_autostart::MacosLauncher::LaunchAgent,
             Some(vec![]),
         ))
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .manage(focus_state)
-        .invoke_handler(tauri::generate_handler![set_focus_state, update_tray_title])
+        .manage(app_status_state.clone())
+        .invoke_handler(tauri::generate_handler![
+            set_focus_state,
+            update_tray_title,
+            app_status
+        ])
         .setup(|app| {
             // Create tray menu
             let show_item = MenuItem::with_id(app, "show", "Show", true, None::<&str>)?;
@@ -74,30 +92,28 @@ pub fn run() {
             tray.set_tooltip(Some("Qdrin - Focus Timer"))?;
 
             // Handle tray menu events
-            tray.on_menu_event(move |app, event| match event.id().as_ref() {
-                "show" => {
-                    if let Some(window) = app.get_webview_window("main") {
-                        let _ = window.show();
-                        let _ = window.set_focus();
-                    }
-                }
-                "hide" => {
-                    if let Some(window) = app.get_webview_window("main") {
-                        let _ = window.hide();
-                    }
-                }
-                "quit" => {
-                    app.exit(0);
-                }
-                _ => {}
+            tray.on_menu_event(handle_menu_event);
+
+            // Start updater
+            let handle = app.app_handle().clone();
+            let app_status = app.state::<AppStatus>();
+            let status_clone = app_status.inner().clone();
+
+            tauri::async_runtime::spawn(async move {
+                info!("Starting update check...");
+                update(handle, status_clone).await;
             });
 
-            // Handle tray icon click (show window)
-            tray.on_tray_icon_event(|tray, event| {
-                if let tauri::tray::TrayIconEvent::Click { .. } = event {
-                    if let Some(app) = tray.app_handle().get_webview_window("main") {
-                        let _ = app.show();
-                        let _ = app.set_focus();
+            // Listen for app status updates and send to frontend
+            let app_status = app.state::<AppStatus>();
+            let app_handle = app.app_handle().clone();
+            let status_clone = app_status.inner().clone();
+
+            tauri::async_runtime::spawn(async move {
+                let mut rx = status_clone.subscribe();
+                while let Ok(status) = rx.recv().await {
+                    if let Some(window) = app_handle.get_webview_window("main") {
+                        let _ = window.emit("app-status-changed", &status);
                     }
                 }
             });
@@ -106,4 +122,97 @@ pub fn run() {
         })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
+}
+
+fn handle_menu_event(app: &AppHandle<Wry>, event: tauri::menu::MenuEvent) {
+    match event.id().as_ref() {
+        "show" => {
+            if let Some(window) = app.get_webview_window("main") {
+                let _ = window.show();
+                let _ = window.set_focus();
+            }
+        }
+        "hide" => {
+            if let Some(window) = app.get_webview_window("main") {
+                let _ = window.hide();
+            }
+        }
+        "quit" => {
+            app.exit(0);
+        }
+        _ => {}
+    }
+}
+
+async fn update(app: tauri::AppHandle, app_status: AppStatus) {
+    app_status.update(Status::CheckingForUpdates).await;
+
+    let Ok(updater) = app.updater() else {
+        error!("Updater not configured");
+        app_status
+            .update(Status::Running {
+                version: env!("CARGO_PKG_VERSION").to_string(),
+            })
+            .await;
+        return;
+    };
+
+    if let Ok(Some(update)) = updater.check().await {
+        let mut downloaded = 0;
+        let mut progress = 0;
+
+        info!("Update available: {}", update.version);
+
+        let app_status_for_download = app_status.clone();
+
+        let result = update
+            .download_and_install(
+                move |chunk_length, content_length| {
+                    downloaded += chunk_length;
+
+                    let new_progress = if let Some(total) = content_length {
+                        ((downloaded as f64 / total as f64) * 100.0) as u8
+                    } else {
+                        0
+                    };
+                    let app_status_clone = app_status_for_download.clone();
+
+                    if new_progress != progress {
+                        progress = new_progress;
+                        tokio::spawn(async move {
+                            app_status_clone
+                                .update(Status::DownloadingUpdate {
+                                    progress: new_progress,
+                                })
+                                .await;
+                        });
+                    }
+                },
+                || {
+                    info!("Download finished");
+                },
+            )
+            .await;
+
+        if let Err(e) = result {
+            error!("Failed to download and install update: {e}");
+            app_status
+                .update(Status::Running {
+                    version: env!("CARGO_PKG_VERSION").to_string(),
+                })
+                .await;
+            return;
+        } else {
+            info!("Update installed");
+        }
+        app.restart();
+    } else {
+        info!("No update available");
+        // No update available, set status to running
+        app_status
+            .update(Status::Running {
+                version: env!("CARGO_PKG_VERSION").to_string(),
+            })
+            .await;
+    }
 }

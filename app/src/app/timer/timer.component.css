@@ -76,6 +76,27 @@
   height: 16px;
 }
 
+.app-status {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  background: var(--color-dark);
+  color: var(--gray-light);
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  opacity: 0.85;
+  max-width: 280px;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-status .status-text {
+  display: block;
+}
+
 .icon-buttons {
   position: absolute;
   top: 8px;

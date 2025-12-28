@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "qdrin",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "identifier": "com.atteo.qdrin",
   "build": {
     "beforeDevCommand": "yarn run start",
@@ -64,7 +64,10 @@
             "core:menu:default",
             "autostart:allow-enable",
             "autostart:allow-disable",
-            "autostart:allow-is-enabled"
+            "autostart:allow-is-enabled",
+            "core:default",
+            "core:event:default",
+            "core:event:allow-listen"
           ]
         }
       ]
@@ -86,7 +89,7 @@
     "updater": {
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEQ0MzhFRkI5QkE1MkI3QTcKUldTbnQxSzZ1ZTg0MUpJYWJNRUpBdzYxeStzcWREc3NjZEpicTRwN21QZjZwZGdTQmN0ajEvRTEK",
       "endpoints": [
-        "https://gist.githubusercontent.com/tomekpiotrowski/ec098f2ce19021ef4ec860a549182284/raw/31b60c185d9c438512e1a502710f382a76819751/qdrin-updater.json"
+        "https://gist.githubusercontent.com/tomekpiotrowski/ec098f2ce19021ef4ec860a549182284/raw/qdrin-updater.json"
       ]
     }
   }

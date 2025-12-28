@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { getCurrentWindow, LogicalSize } from '@tauri-apps/api/window';
 import { invoke } from '@tauri-apps/api/core';
 import { Options } from '../models/options';
+import { StatusService } from '../status.service';
 
 const WindowWidth = 400;
 const WindowHeight = 200;
@@ -93,7 +94,7 @@ export class TimerComponent implements OnInit, OnDestroy {
     }
   }
 
-  constructor() {
+  constructor(public statusService: StatusService) {
     // Request notification permission on startup
     if ('Notification' in window && Notification.permission === 'default') {
       Notification.requestPermission();
@@ -217,7 +218,7 @@ export class TimerComponent implements OnInit, OnDestroy {
     } else if (this.state === State.FocusExtra) {
       this.updateFocusState(State.FocusExtraPaused);
     }
-    
+
     this.updateTrayTitle();
   }
 
@@ -228,7 +229,7 @@ export class TimerComponent implements OnInit, OnDestroy {
 
     // Drop break UI affordances (e.g., always-on-top) when returning to stopped
     await this.exitBreakMode();
-    
+
     this.updateTrayTitle();
   }
 
