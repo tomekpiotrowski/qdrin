@@ -11,15 +11,46 @@ mod app_status;
 use app_status::{AppStatus, Status};
 
 // Shared state for focus mode
-#[derive(Default, Clone)]
+#[derive(Clone)]
 struct FocusState {
     is_focusing: Arc<Mutex<bool>>,
+    is_timer_running: Arc<Mutex<bool>>,
+    idle_reminder_enabled: Arc<Mutex<bool>>,
+    idle_reminder_interval_minutes: Arc<Mutex<u64>>,
+}
+
+impl Default for FocusState {
+    fn default() -> Self {
+        Self {
+            is_focusing: Arc::new(Mutex::new(false)),
+            is_timer_running: Arc::new(Mutex::new(false)),
+            idle_reminder_enabled: Arc::new(Mutex::new(true)),
+            idle_reminder_interval_minutes: Arc::new(Mutex::new(10)),
+        }
+    }
 }
 
 #[tauri::command]
 fn set_focus_state(state: State<'_, FocusState>, is_focusing: bool) {
     if let Ok(mut focus) = state.is_focusing.lock() {
         *focus = is_focusing;
+    }
+}
+
+#[tauri::command]
+fn set_timer_running(state: State<'_, FocusState>, is_running: bool) {
+    if let Ok(mut running) = state.is_timer_running.lock() {
+        *running = is_running;
+    }
+}
+
+#[tauri::command]
+fn set_idle_reminder_settings(state: State<'_, FocusState>, enabled: bool, interval_minutes: u64) {
+    if let Ok(mut enabled_flag) = state.idle_reminder_enabled.lock() {
+        *enabled_flag = enabled;
+    }
+    if let Ok(mut interval) = state.idle_reminder_interval_minutes.lock() {
+        *interval = interval_minutes;
     }
 }
 
@@ -76,6 +107,8 @@ pub fn run() {
         .manage(app_status_state.clone())
         .invoke_handler(tauri::generate_handler![
             set_focus_state,
+            set_timer_running,
+            set_idle_reminder_settings,
             update_tray_title,
             app_status
         ])
@@ -114,6 +147,77 @@ pub fn run() {
                 while let Ok(status) = rx.recv().await {
                     if let Some(window) = app_handle.get_webview_window("main") {
                         let _ = window.emit("app-status-changed", &status);
+                    }
+                }
+            });
+
+            // Spawn idle reminder loop
+            let focus_state = app.state::<FocusState>();
+            let focus_state_clone = focus_state.inner().clone();
+            let app_handle = app.app_handle().clone();
+
+            tauri::async_runtime::spawn(async move {
+                info!("Idle reminder loop started");
+
+                let mut idle_time_secs = 0u64;
+
+                loop {
+                    tokio::time::sleep(tokio::time::Duration::from_secs(60)).await;
+
+                    // Read idle reminder settings from state
+                    let enabled = *focus_state_clone
+                        .idle_reminder_enabled
+                        .lock()
+                        .unwrap_or_else(|e| e.into_inner());
+
+                    let interval_minutes = *focus_state_clone
+                        .idle_reminder_interval_minutes
+                        .lock()
+                        .unwrap_or_else(|e| e.into_inner());
+
+                    info!("Idle reminder check: enabled={}, interval={} minutes, idle_time={} seconds",
+                        enabled, interval_minutes, idle_time_secs);
+
+                    // Skip if idle reminders are disabled
+                    if !enabled {
+                        idle_time_secs = 0;
+                        continue;
+                    }
+
+                    let is_running = *focus_state_clone
+                        .is_timer_running
+                        .lock()
+                        .unwrap_or_else(|e| e.into_inner());
+
+                    info!("Timer is_running: {}", is_running);
+
+                    if is_running {
+                        idle_time_secs = 0;
+                        continue;
+                    }
+
+                    idle_time_secs += 60;
+
+                    // Defensive default to avoid zero/negative interval
+                    let threshold_secs = interval_minutes.max(1) * 60;
+
+                    info!("Checking threshold: idle_time_secs={}, threshold_secs={}", idle_time_secs, threshold_secs);
+
+                    // Show notification when idle time reaches threshold
+                    if idle_time_secs >= threshold_secs {
+                        idle_time_secs = 0;
+                        info!("Attempting to show idle reminder notification");
+
+                        // Emit event to frontend to show notification via webview Notification API
+                        if let Some(window) = app_handle.get_webview_window("main") {
+                            if let Err(e) = window.emit("show-idle-reminder", ()) {
+                                error!("✗ Failed to emit idle reminder event: {}", e);
+                            } else {
+                                info!("✓ Idle reminder event emitted to frontend after {} minutes", interval_minutes.max(1));
+                            }
+                        } else {
+                            error!("✗ Main window not found, cannot show idle reminder");
+                        }
                     }
                 }
             });

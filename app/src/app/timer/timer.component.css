@@ -41,7 +41,7 @@
   margin-bottom: 32px;
 }
 
-.fullscreen-mode .session-label {
+.fullscreen-mode .block-label {
   font-size: 4rem;
   margin-bottom: 48px;
   letter-spacing: 8px;
@@ -55,7 +55,7 @@
   text-align: center;
 }
 
-.session-badge {
+.block-badge {
   position: absolute;
   top: 8px;
   left: 8px;
@@ -148,7 +148,7 @@
   margin-bottom: 4px;
 }
 
-.session-label {
+.block-label {
   font-size: 0.9rem;
   color: var(--gray-medium);
   text-transform: uppercase;

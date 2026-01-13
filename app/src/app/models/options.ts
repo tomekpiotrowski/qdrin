@@ -6,6 +6,8 @@ export class Options {
   autostart: boolean = false;
   fullscreen: boolean = false;
   soundEnabled: boolean = true;
+  idleReminderEnabled: boolean = true;
+  idleReminderInterval: number = 10; // minutes
 
   constructor(data?: Partial<Options>) {
     if (data) {
@@ -16,6 +18,8 @@ export class Options {
       this.autostart = data.autostart ?? this.autostart;
       this.fullscreen = data.fullscreen ?? this.fullscreen;
       this.soundEnabled = data.soundEnabled ?? this.soundEnabled;
+      this.idleReminderEnabled = data.idleReminderEnabled ?? this.idleReminderEnabled;
+      this.idleReminderInterval = data.idleReminderInterval ?? this.idleReminderInterval;
     }
   }
 
@@ -44,7 +48,9 @@ export class Options {
       longBreakDuration: this.longBreakDuration,
       autostart: this.autostart,
       fullscreen: this.fullscreen,
-      soundEnabled: this.soundEnabled
+      soundEnabled: this.soundEnabled,
+      idleReminderEnabled: this.idleReminderEnabled,
+      idleReminderInterval: this.idleReminderInterval
     });
   }
 

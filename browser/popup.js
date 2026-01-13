@@ -14,6 +14,7 @@ async function init() {
     renderAllowList();
   } catch (err) {
     console.error('Failed to get status:', err);
+    document.getElementById('status-text').textContent = 'Error: ' + err.message;
     document.getElementById('website-list').innerHTML = '<li class="empty-state">Error loading extension</li>';
   }
 }

@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Qdrin Focus Blocker",
   "version": "0.3.0",
-  "description": "Blocks distracting websites during Qdrin focus sessions",
+  "description": "Blocks distracting websites during Qdrin focus blocks",
   "permissions": [
     "declarativeNetRequest",
     "storage",

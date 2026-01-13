@@ -4,6 +4,7 @@
 let isBlocking = false;
 let blockedWebsites = [];
 let allowWebsites = [];
+let storageLoaded = false;
 
 // Helpers
 function escapeRegex(str) {
@@ -75,10 +76,25 @@ async function pollQdrinStatus() {
 setInterval(pollQdrinStatus, 2000);
 pollQdrinStatus(); // Initial check
 
+// Clear any stale rules on startup
+(async () => {
+    await chrome.declarativeNetRequest.updateDynamicRules({
+        removeRuleIds: Array.from({ length: 1000 }, (_, i) => i + 1)
+    });
+})();
+
 // Listen for messages from popup or content scripts
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.type === 'GET_STATUS') {
+        // Ensure storage is loaded before responding
+        if (!storageLoaded) {
+            loadStorage().then(() => {
+                sendResponse({ isBlocking, blockedWebsites, allowWebsites });
+            });
+            return true; // Keep message channel open for async response
+        }
         sendResponse({ isBlocking, blockedWebsites, allowWebsites });
+        return true; // Keep message channel open
     } else if (message.type === 'UPDATE_WEBSITES') {
         blockedWebsites = message.websites;
         if (isBlocking) {
@@ -103,7 +119,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                 const result = await chrome.storage.session.get([`blocked_${tabId}`]);
                 const url = result[`blocked_${tabId}`];
                 if (url) {
-                    console.log('Got URL from storage on attempt', i + 1, ':', url);
                     sendResponse({ url });
                     return;
                 }
@@ -111,7 +126,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                     await new Promise(resolve => setTimeout(resolve, 50));
                 }
             }
-            console.log('No URL found in storage for tab', tabId);
             sendResponse({ url: '' });
         })();
         return true; // Keep message channel open for async response
@@ -121,14 +135,19 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 // Update blocking rules
 async function updateBlockingRules() {
-    if (!isBlocking || (blockedWebsites.length === 0 && allowWebsites.length === 0)) {
-        await chrome.declarativeNetRequest.updateDynamicRules({
-            removeRuleIds: Array.from({ length: 1000 }, (_, i) => i + 1)
-        });
+    // ALWAYS remove rules first
+    await chrome.declarativeNetRequest.updateDynamicRules({
+        removeRuleIds: Array.from({ length: 1000 }, (_, i) => i + 1)
+    });
 
-        if (!isBlocking) {
-            await restoreBlockedTabs();
-        }
+    // If blocking is inactive, stop here after removing rules
+    if (!isBlocking) {
+        await restoreBlockedTabs();
+        return;
+    }
+
+    // If no websites configured, stop here (rules already removed)
+    if (blockedWebsites.length === 0 && allowWebsites.length === 0) {
         return;
     }
 
@@ -167,8 +186,8 @@ async function updateBlockingRules() {
         });
     });
 
+    // Add new rules (we already removed all rules above)
     await chrome.declarativeNetRequest.updateDynamicRules({
-        removeRuleIds: Array.from({ length: 1000 }, (_, i) => i + 1),
         addRules: rules
     });
 }
@@ -183,7 +202,6 @@ async function restoreBlockedTabs() {
                 const stored = await chrome.storage.session.get([`blocked_${tab.id}`]);
                 const originalUrl = stored[`blocked_${tab.id}`];
                 if (originalUrl) {
-                    console.log('Restoring tab', tab.id, 'to:', originalUrl);
                     // Clean up storage FIRST to avoid any re-blocking issues
                     await chrome.storage.session.remove([`blocked_${tab.id}`]);
                     // Then restore the tab
@@ -220,7 +238,6 @@ chrome.webNavigation.onBeforeNavigate.addListener((details) => {
         chrome.storage.session.set({
             [`blocked_${details.tabId}`]: details.url
         });
-        console.log('Storing blocked URL for tab', details.tabId, ':', details.url);
     } else {
         // Clear storage for non-blocked URLs to ensure clean state
         chrome.storage.session.remove([`blocked_${details.tabId}`]);
@@ -276,14 +293,19 @@ async function checkAllOpenTabs() {
     }
 }
 
-// Load blocked websites from storage on startup
-chrome.storage.local.get(['blockedWebsites', 'allowWebsites'], (result) => {
+// Load blocked websites from storage
+async function loadStorage() {
+    if (storageLoaded) return;
+
+    const result = await chrome.storage.local.get(['blockedWebsites', 'allowWebsites']);
     if (result.blockedWebsites) {
         blockedWebsites = result.blockedWebsites;
     }
     if (result.allowWebsites) {
         allowWebsites = result.allowWebsites;
     }
-});
+    storageLoaded = true;
+}
 
-console.log('Qdrin Focus Blocker loaded');
+// Load on startup
+loadStorage();

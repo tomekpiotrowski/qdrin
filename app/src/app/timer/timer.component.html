@@ -1,7 +1,7 @@
-<div class="theme-wrapper" [class.theme-blue]="isWorkSession" [class.theme-red]="!isWorkSession">
-  <main class="container" [class.fullscreen-mode]="fullscreen">
-    <div class="session-badge">
-      <img src="assets/icon.png" alt="Sessions" class="badge-icon"> {{ completedSessions }}
+<div class="theme-wrapper" [class.theme-blue]="isWorkBlock" [class.theme-red]="!isWorkBlock">
+  <div class="container" [class.fullscreen-mode]="fullscreen">
+    <div class="block-badge">
+      <img src="assets/icon.png" alt="Blocks" class="badge-icon"> {{ completedBlocks }}
     </div>
 
     <div class="icon-buttons">
@@ -19,7 +19,7 @@
     <div class="timer-card">
       <div class="timer-display">
         <div class="time">{{ formattedTime }}</div>
-        <div class="session-label">{{ sessionLabel }}</div>
+        <div class="block-label">{{ blockLabel }}</div>
       </div>
 
       <div class="controls">
@@ -83,5 +83,5 @@
       </div>
 
     </div>
-  </main>
+  </div>
 </div>

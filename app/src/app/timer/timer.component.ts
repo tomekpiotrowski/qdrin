@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { getCurrentWindow, LogicalSize } from '@tauri-apps/api/window';
 import { invoke } from '@tauri-apps/api/core';
+import { listen } from '@tauri-apps/api/event';
 import { Options } from '../models/options';
 import { StatusService } from '../status.service';
 
@@ -10,11 +11,11 @@ const WindowHeight = 200;
 
 enum State {
   Stopped, // Not started or paused
-  Focus,  // In a focus session
-  FocusPaused, // Focus session paused
+  Focus,  // In a focus block
+  FocusPaused, // Focus block paused
   FocusExtra, // User postponed the break by clicking "Snooze"
-  FocusExtraPaused, // FocusExtra session paused
-  Break, // In a break session
+  FocusExtraPaused, // FocusExtra block paused
+  Break, // In a break block
   WaitingForFocus // Break is over, waiting for user to click "Back to Work"
 }
 
@@ -28,7 +29,7 @@ enum State {
 export class TimerComponent implements OnInit, OnDestroy {
   // Timer state
   timeRemaining = 5; // 5 seconds for testing
-  completedSessions = 0;
+  completedBlocks = 0;
   state: State = State.Stopped;
   fullscreen = false;
 
@@ -55,7 +56,7 @@ export class TimerComponent implements OnInit, OnDestroy {
     return this.timerInterval !== null;
   }
 
-  get isWorkSession(): boolean {
+  get isWorkBlock(): boolean {
     return this.state === State.Focus || this.state === State.FocusPaused ||
       this.state === State.FocusExtra || this.state === State.FocusExtraPaused ||
       this.state === State.Stopped || this.state === State.WaitingForFocus;
@@ -73,7 +74,7 @@ export class TimerComponent implements OnInit, OnDestroy {
     return this.state === State.WaitingForFocus;
   }
 
-  get sessionLabel(): string {
+  get blockLabel(): string {
     switch (this.state) {
       case State.Stopped:
         return 'Ready to Start';
@@ -95,11 +96,6 @@ export class TimerComponent implements OnInit, OnDestroy {
   }
 
   constructor(public statusService: StatusService) {
-    // Request notification permission on startup
-    if ('Notification' in window && Notification.permission === 'default') {
-      Notification.requestPermission();
-    }
-
     // Initialize audio context
     if (typeof AudioContext !== 'undefined') {
       this.audioContext = new AudioContext();
@@ -121,6 +117,11 @@ export class TimerComponent implements OnInit, OnDestroy {
     }
     // Initialize tray title
     this.updateTrayTitle();
+
+    // Listen for idle reminder events from backend
+    listen('show-idle-reminder', () => {
+      this.showIdleReminderNotification();
+    });
   }
 
   private loadSettings(): void {
@@ -130,6 +131,9 @@ export class TimerComponent implements OnInit, OnDestroy {
     this.BREAK_TIME = this.settings.shortBreakDuration * 60;
     this.LONG_BREAK_TIME = this.settings.longBreakDuration * 60;
     this.fullscreen = this.settings.fullscreen;
+
+    // Keep idle reminder settings in sync with backend
+    this.updateIdleReminderSettings();
 
     // Update current time if in stopped state
     if (this.state === State.Stopped) {
@@ -146,6 +150,36 @@ export class TimerComponent implements OnInit, OnDestroy {
     invoke('set_focus_state', { isFocusing }).catch(err => {
       console.error('Failed to update focus state:', err);
     });
+  }
+
+  private updateTimerRunningState(isRunning: boolean): void {
+    invoke('set_timer_running', { isRunning }).catch(err => {
+      console.error('Failed to update timer running state:', err);
+    });
+  }
+
+  private updateIdleReminderSettings(): void {
+    invoke('set_idle_reminder_settings', {
+      enabled: this.settings.idleReminderEnabled,
+      intervalMinutes: this.settings.idleReminderInterval,
+    }).catch(err => {
+      console.error('Failed to update idle reminder settings:', err);
+    });
+  }
+
+  private async showIdleReminderNotification(): Promise<void> {
+
+    try {
+      const window = getCurrentWindow();
+      await window.show();
+      await window.setAlwaysOnTop(true);
+      // Remove always-on-top after a short delay so it doesn't stay on top forever
+      setTimeout(async () => {
+        await window.setAlwaysOnTop(false);
+      }, 300); // 3 seconds
+    } catch (error) {
+      console.error('Failed to show idle reminder:', error);
+    }
   }
 
   get formattedTime(): string {
@@ -166,10 +200,13 @@ export class TimerComponent implements OnInit, OnDestroy {
       this.updateFocusState(State.FocusExtra);
     }
 
+    // Notify backend that timer is running
+    this.updateTimerRunningState(true);
+
     // Update tray title immediately when starting
     this.updateTrayTitle();
 
-    // Only hide window during focus sessions
+      // Only hide window during focus blocks
     if (this.state === State.Focus || this.state === State.FocusExtra) {
       if (this.settings.soundEnabled) {
         this.playFocusSound();
@@ -194,7 +231,7 @@ export class TimerComponent implements OnInit, OnDestroy {
       }
 
       if (this.timeRemaining <= 0) {
-        this.completeSession();
+        this.completeBlock();
       }
     }, 100); // Check every 100ms for more accurate display
 
@@ -212,6 +249,9 @@ export class TimerComponent implements OnInit, OnDestroy {
       this.timerInterval = null;
     }
 
+    // Notify backend that timer is not running
+    this.updateTimerRunningState(false);
+
     // Update state to paused variant
     if (this.state === State.Focus) {
       this.updateFocusState(State.FocusPaused);
@@ -226,6 +266,7 @@ export class TimerComponent implements OnInit, OnDestroy {
     this.pauseTimer();
     this.timeRemaining = this.WORK_TIME;
     this.updateFocusState(State.Stopped);
+    this.updateTimerRunningState(false);
 
     // Drop break UI affordances (e.g., always-on-top) when returning to stopped
     await this.exitBreakMode();
@@ -233,7 +274,7 @@ export class TimerComponent implements OnInit, OnDestroy {
     this.updateTrayTitle();
   }
 
-  private async completeSession(): Promise<void> {
+  private async completeBlock(): Promise<void> {
     // Save the state before pausing (since pauseTimer changes state)
     const stateBeforePause = this.state;
     this.pauseTimer();
@@ -242,7 +283,7 @@ export class TimerComponent implements OnInit, OnDestroy {
 
     // Show notification
     if ('Notification' in window && Notification.permission === 'granted') {
-      const title = wasFocusState ? 'Work Session Complete!' : 'Break Complete!';
+      const title = wasFocusState ? 'Work Block Complete!' : 'Break Complete!';
       const body = wasFocusState ? 'Time for a break!' : 'Time to focus!';
       const notification = new Notification(title, {
         body: body,
@@ -261,7 +302,7 @@ export class TimerComponent implements OnInit, OnDestroy {
     await this.focusWindow();
 
     if (stateBeforePause === State.FocusExtra) {
-      // FocusExtra session completed, go back to break
+      // FocusExtra block completed, go back to break
       this.updateFocusState(State.Break);
       if (this.settings.soundEnabled) {
         this.playBreakSound();
@@ -272,16 +313,16 @@ export class TimerComponent implements OnInit, OnDestroy {
       this.timeRemaining = this.remainingBreakTime;
       this.startTimer();
     } else if (stateBeforePause === State.Focus) {
-      // Focus session completed, start break
-      this.completedSessions++;
+      // Focus block completed, start break
+      this.completedBlocks++;
       this.updateFocusState(State.Break);
       if (this.settings.soundEnabled) {
         this.playBreakSound();
       }
       await this.enterBreakMode();
 
-      // Use long break every 4 sessions
-      this.timeRemaining = this.completedSessions % 4 === 0
+      // Use long break every 4 blocks
+      this.timeRemaining = this.completedBlocks % 4 === 0
         ? this.LONG_BREAK_TIME
         : this.BREAK_TIME;
 
@@ -289,6 +330,7 @@ export class TimerComponent implements OnInit, OnDestroy {
     } else {
       // Break completed, wait for user to start focus
       this.updateFocusState(State.WaitingForFocus);
+      this.updateTimerRunningState(false);
       this.timeRemaining = this.WORK_TIME;
       await this.exitBreakMode();
       // Don't auto-start, wait for user

@@ -1,6 +1,6 @@
 # Qdrin Focus Blocker - Chrome Extension
 
-A Chrome extension that automatically blocks distracting websites during Qdrin focus sessions.
+A Chrome extension that automatically blocks distracting websites during Qdrin focus blocks.
 
 ## Installation
 
@@ -18,7 +18,7 @@ A Chrome extension that automatically blocks distracting websites during Qdrin f
 
 ## Features
 
-- ✅ Block websites during focus sessions
+- ✅ Block websites during focus blocks
 - ✅ Custom blocked website list
 - ✅ Beautiful blocked page with focus reminder
 - ✅ Easy to manage blocked sites
