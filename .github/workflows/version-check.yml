@@ -30,9 +30,9 @@ jobs:
             }' "$1"
           }
 
-          PACKAGE_VERSION=$(extract_json_version package.json)
-          TAURI_VERSION=$(extract_json_version src-tauri/tauri.conf.json)
-          CARGO_VERSION=$(extract_toml_version src-tauri/Cargo.toml)
+          PACKAGE_VERSION=$(extract_json_version app/package.json)
+          TAURI_VERSION=$(extract_json_version app/src-tauri/tauri.conf.json)
+          CARGO_VERSION=$(extract_toml_version app/src-tauri/Cargo.toml)
 
           echo "Tag version: $TAG_VERSION"
           echo "package.json version: $PACKAGE_VERSION"
