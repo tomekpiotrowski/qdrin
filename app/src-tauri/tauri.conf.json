@@ -1,5 +1,5 @@
 {
-  "version": "0.3.0",
+  "version": "0.3.1",
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "qdrin",
   "identifier": "com.atteo.qdrin",
