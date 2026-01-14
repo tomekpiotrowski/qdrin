@@ -329,6 +329,9 @@ export class TimerComponent implements OnInit, OnDestroy {
       this.startTimer();
     } else {
       // Break completed, wait for user to start focus
+      if (this.settings.soundEnabled) {
+        this.playBreakCompleteSound();
+      }
       this.updateFocusState(State.WaitingForFocus);
       this.updateTimerRunningState(false);
       this.timeRemaining = this.WORK_TIME;
@@ -426,6 +429,46 @@ export class TimerComponent implements OnInit, OnDestroy {
       oscillator2.stop(this.audioContext.currentTime + 0.5);
     } catch (error) {
       console.error('Failed to play break sound:', error);
+    }
+  }
+
+  private playBreakCompleteSound(): void {
+    if (!this.audioContext) return;
+
+    try {
+      const oscillator1 = this.audioContext.createOscillator();
+      const oscillator2 = this.audioContext.createOscillator();
+      const oscillator3 = this.audioContext.createOscillator();
+      const gainNode = this.audioContext.createGain();
+
+      oscillator1.connect(gainNode);
+      oscillator2.connect(gainNode);
+      oscillator3.connect(gainNode);
+      gainNode.connect(this.audioContext.destination);
+
+      // Three-tone chime (break ending - time to focus)
+      oscillator1.type = 'sine';
+      oscillator1.frequency.setValueAtTime(800, this.audioContext.currentTime);
+
+      oscillator2.type = 'sine';
+      oscillator2.frequency.setValueAtTime(600, this.audioContext.currentTime + 0.15);
+
+      oscillator3.type = 'sine';
+      oscillator3.frequency.setValueAtTime(800, this.audioContext.currentTime + 0.3);
+
+      gainNode.gain.setValueAtTime(0.3, this.audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.6);
+
+      oscillator1.start(this.audioContext.currentTime);
+      oscillator1.stop(this.audioContext.currentTime + 0.15);
+
+      oscillator2.start(this.audioContext.currentTime + 0.15);
+      oscillator2.stop(this.audioContext.currentTime + 0.3);
+
+      oscillator3.start(this.audioContext.currentTime + 0.3);
+      oscillator3.stop(this.audioContext.currentTime + 0.6);
+    } catch (error) {
+      console.error('Failed to play break complete sound:', error);
     }
   }
 
