@@ -117,11 +117,6 @@ export class TimerComponent implements OnInit, OnDestroy {
     }
     // Initialize tray title
     this.updateTrayTitle();
-
-    // Listen for idle reminder events from backend
-    listen('show-idle-reminder', () => {
-      this.showIdleReminderNotification();
-    });
   }
 
   private loadSettings(): void {
@@ -131,9 +126,6 @@ export class TimerComponent implements OnInit, OnDestroy {
     this.BREAK_TIME = this.settings.shortBreakDuration * 60;
     this.LONG_BREAK_TIME = this.settings.longBreakDuration * 60;
     this.fullscreen = this.settings.fullscreen;
-
-    // Keep idle reminder settings in sync with backend
-    this.updateIdleReminderSettings();
 
     // Update current time if in stopped state
     if (this.state === State.Stopped) {
@@ -156,30 +148,6 @@ export class TimerComponent implements OnInit, OnDestroy {
     invoke('set_timer_running', { isRunning }).catch(err => {
       console.error('Failed to update timer running state:', err);
     });
-  }
-
-  private updateIdleReminderSettings(): void {
-    invoke('set_idle_reminder_settings', {
-      enabled: this.settings.idleReminderEnabled,
-      intervalMinutes: this.settings.idleReminderInterval,
-    }).catch(err => {
-      console.error('Failed to update idle reminder settings:', err);
-    });
-  }
-
-  private async showIdleReminderNotification(): Promise<void> {
-
-    try {
-      const window = getCurrentWindow();
-      await window.show();
-      await window.setAlwaysOnTop(true);
-      // Remove always-on-top after a short delay so it doesn't stay on top forever
-      setTimeout(async () => {
-        await window.setAlwaysOnTop(false);
-      }, 300); // 3 seconds
-    } catch (error) {
-      console.error('Failed to show idle reminder:', error);
-    }
   }
 
   get formattedTime(): string {

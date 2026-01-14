@@ -19,18 +19,6 @@ export class OptionsComponent implements OnInit {
   ngOnInit(): void {
     this.settings = Options.load();
     this.syncAutostart();
-    this.syncIdleReminderSettings();
-  }
-
-  private async syncIdleReminderSettings(): Promise<void> {
-    try {
-      await invoke('set_idle_reminder_settings', {
-        enabled: this.settings.idleReminderEnabled,
-        intervalMinutes: this.settings.idleReminderInterval,
-      });
-    } catch (err) {
-      console.error('Failed to sync idle reminder settings', err);
-    }
   }
 
   private async syncAutostart(): Promise<void> {
@@ -64,8 +52,6 @@ export class OptionsComponent implements OnInit {
 
   saveSettings(): void {
     this.settings.save();
-    // Sync idle reminder settings to backend
-    this.syncIdleReminderSettings();
     // Trigger storage event for the timer component
     window.dispatchEvent(new Event('storage'));
   }
@@ -89,7 +75,7 @@ export class OptionsComponent implements OnInit {
     }
   }
 
-  validateInput(event: Event, field: keyof Pick<Options, 'focusDuration' | 'shortBreakDuration' | 'longBreakDuration' | 'idleReminderInterval'>, defaultValue: number = 1): void {
+  validateInput(event: Event, field: keyof Pick<Options, 'focusDuration' | 'shortBreakDuration' | 'longBreakDuration'>, defaultValue: number = 1): void {
     const input = event.target as HTMLInputElement;
     const value = parseInt(input.value, 10);
 
@@ -101,14 +87,14 @@ export class OptionsComponent implements OnInit {
     this.saveSettings();
   }
 
-  increment(field: keyof Pick<Options, 'focusDuration' | 'shortBreakDuration' | 'longBreakDuration' | 'idleReminderInterval'>, max: number): void {
+  increment(field: keyof Pick<Options, 'focusDuration' | 'shortBreakDuration' | 'longBreakDuration'>, max: number): void {
     if (this.settings[field] < max) {
       this.settings[field]++;
       this.saveSettings();
     }
   }
 
-  decrement(field: keyof Pick<Options, 'focusDuration' | 'shortBreakDuration' | 'longBreakDuration' | 'idleReminderInterval'>, min: number): void {
+  decrement(field: keyof Pick<Options, 'focusDuration' | 'shortBreakDuration' | 'longBreakDuration'>, min: number): void {
     if (this.settings[field] > min) {
       this.settings[field]--;
       this.saveSettings();

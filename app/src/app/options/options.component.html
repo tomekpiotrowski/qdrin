@@ -23,26 +23,6 @@
 
     <div class="option-item">
       <label class="option-label">
-        <input type="checkbox" [(ngModel)]="settings.idleReminderEnabled" (ngModelChange)="saveSettings()">
-        <span>Enable idle reminders</span>
-      </label>
-    </div>
-
-    <div class="option-item">
-      <label class="option-label">
-        <div class="number-input-wrapper">
-          <input type="number" [(ngModel)]="settings.idleReminderInterval" min="1" max="120" step="1" (keydown)="onKeyDown($event)" (blur)="validateInput($event, 'idleReminderInterval', 10)" [disabled]="!settings.idleReminderEnabled">
-          <div class="spinner-buttons">
-            <button type="button" class="spinner-btn spinner-up" (click)="increment('idleReminderInterval', 120)" [disabled]="!settings.idleReminderEnabled">▲</button>
-            <button type="button" class="spinner-btn spinner-down" (click)="decrement('idleReminderInterval', 1)" [disabled]="!settings.idleReminderEnabled">▼</button>
-          </div>
-        </div>
-        <span>Idle reminder interval (minutes)</span>
-      </label>
-    </div>
-
-    <div class="option-item">
-      <label class="option-label">
         <div class="number-input-wrapper">
           <input type="number" [(ngModel)]="settings.focusDuration" min="1" max="120" step="1" (keydown)="onKeyDown($event)" (blur)="validateInput($event, 'focusDuration', 25)">
           <div class="spinner-buttons">
